@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  email     String  @unique
+  firstName String
+  lastName  String
+  password  String
+  imageUri  String?
+
+  Conversations Conversation[] @relation("ConversationUser")
+  Message       Message[]
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  users     User[]    @relation("ConversationUser")
+  messages  Message[] @relation("ConversationMessage")
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  text           String
+  sentAt         DateTime     @default(now())
+  seen           Boolean      @default(false)
+  sender         User         @relation(fields: [senderId], references: [id])
+  senderId       String
+  Conversation   Conversation @relation("ConversationMessage", fields: [ConversationId], references: [id])
+  ConversationId String
+}
