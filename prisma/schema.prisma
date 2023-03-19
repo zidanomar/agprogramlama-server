@@ -15,11 +15,18 @@ model User {
   email     String  @unique
   firstName String
   lastName  String
-  password  String
   imageUri  String?
 
-  Conversations Conversation[] @relation("ConversationUser")
-  Message       Message[]
+  conversations  Conversation[]  @relation("ConversationUser")
+  messages       Message[]
+  userCredential UserCredential?
+}
+
+model UserCredential {
+  id       String @id @default(uuid())
+  password String
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String @unique
 }
 
 model Conversation {
