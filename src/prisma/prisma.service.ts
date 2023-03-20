@@ -8,12 +8,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     this.$use(async (params, next) => {
       if (
         (params.action === 'create' || params.action === 'update') &&
-        params.model === 'UserCredential'
+        params.model === 'User'
       ) {
         const user = params.args.data;
         const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(user.password, salt);
-        user.password = hash;
+        const hash = bcrypt.hashSync(user.userCredential.create.password, salt);
+        user.userCredential.create.password = hash;
         params.args.data = user;
       }
       return next(params);
