@@ -1,13 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
-  async register(data: RegisterUserDto): Promise<User> {
+  async register(data: RegisterUserDto): Promise<{ access_token: string }> {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -36,6 +39,8 @@ export class UserService {
       },
     });
 
-    return user;
+    return {
+      access_token: this.jwtService.sign(user),
+    };
   }
 }
