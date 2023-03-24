@@ -1,7 +1,6 @@
 import { Controller, Body, UseGuards, Get, Request } from '@nestjs/common';
 import { Post } from '@nestjs/common/decorators';
 import { User } from '@prisma/client';
-import { get } from 'http';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UserService } from './user.service';
