@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -43,6 +44,44 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(existingUser),
+      user: existingUser,
+    };
+  }
+
+  async register(
+    data: RegisterUserDto,
+  ): Promise<{ access_token: string; user: User }> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUser) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'User already exists',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        imageUri: data.imageUri,
+        userCredential: {
+          create: {
+            password: data.password,
+          },
+        },
+      },
+    });
+
+    return {
+      access_token: this.jwtService.sign(user),
+      user,
     };
   }
 }

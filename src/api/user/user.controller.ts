@@ -1,8 +1,8 @@
-import { Controller, Body, UseGuards, Get, Request } from '@nestjs/common';
-import { Post } from '@nestjs/common/decorators';
+import { Controller, UseGuards, Get, Request, Header } from '@nestjs/common';
+
 import { User } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { RegisterUserDto } from './dto/register-user.dto';
+
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -11,14 +11,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
+  @Header('Cache-Control', 'no-cache')
   async getUser(@Request() req): Promise<User> {
     return this.userService.getUser(req.user.id);
-  }
-
-  @Post('register')
-  async register(
-    @Body() userData: RegisterUserDto,
-  ): Promise<{ access_token: string }> {
-    return this.userService.register(userData);
   }
 }
