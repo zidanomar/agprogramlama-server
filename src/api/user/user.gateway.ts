@@ -37,25 +37,18 @@ export class UserGateway {
 
   @UseGuards(WsAuthGuard)
   async handleConnection(@ConnectedSocket() client: WebSocketWithUser) {
-    const socketId = client.id;
-    const token = client.handshake.headers.authorization.split(' ')[1];
+    try {
+      const socketId = client.id;
+      const token = client.handshake.headers.authorization.split(' ')[1];
+      const decodedUser = await this.authService.verifyToken(token);
 
-    if (!token) {
+      client.request.user = decodedUser;
+
+      this.userService.updateUserSocketId(decodedUser.id, socketId);
+    } catch (error) {
+      console.log(`Error verifying token: ${error.message}`);
       client.disconnect();
-      console.log('client disconnected: ' + token);
-      throw new WsException('Missing authentication token');
     }
-
-    const decodedUser = await this.authService.verifyToken(token);
-
-    if (!decodedUser) {
-      client.disconnect();
-      throw new WsException('Invalid authentication token');
-    }
-
-    client.request.user = decodedUser;
-
-    this.userService.updateUserSocketId(decodedUser.id, socketId);
   }
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('message')
