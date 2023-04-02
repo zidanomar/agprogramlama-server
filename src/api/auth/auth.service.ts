@@ -19,6 +19,16 @@ export class AuthService {
     });
   }
 
+  async verifyToken(token: string): Promise<User> {
+    try {
+      const decoded = this.jwtService.verify(token);
+      const user = await this.validateUser(decoded.id);
+      return user;
+    } catch (err) {
+      throw new Error('Invalid token');
+    }
+  }
+
   async login(loginDto: LoginDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: loginDto.email },

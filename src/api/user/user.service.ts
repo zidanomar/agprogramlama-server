@@ -1,8 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RegisterUserDto } from '../auth/dto/register-user.dto';
 
 @Injectable()
 export class UserService {
@@ -12,6 +11,23 @@ export class UserService {
   ) {}
 
   async getUser(userId: string): Promise<User> {
+    return await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
+
+  async updateUserSocketId(userId: string, socketId: string) {
+    return await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        socketId,
+      },
+    });
+  }
+
+  async getUserBySocketId(userId: string): Promise<User> {
     return await this.prisma.user.findUnique({
       where: { id: userId },
     });

@@ -16,6 +16,7 @@ model User {
   firstName String
   lastName  String
   imageUri  String?
+  socketId  String?
 
   conversations  Conversation[]  @relation("ConversationUser")
   messages       Message[]

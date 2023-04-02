@@ -11,7 +11,6 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  @Header('Cache-Control', 'no-cache')
   async getUser(@Request() req): Promise<User> {
     return this.userService.getUser(req.user.id);
   }
