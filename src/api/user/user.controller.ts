@@ -14,4 +14,10 @@ export class UserController {
   async getUser(@Request() req): Promise<User> {
     return this.userService.getUser(req.user.id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('receivers')
+  async getReceivers(@Request() req): Promise<User[]> {
+    return this.userService.getReceivers(req.user.id);
+  }
 }

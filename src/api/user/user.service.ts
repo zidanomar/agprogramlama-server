@@ -32,4 +32,14 @@ export class UserService {
       where: { id: userId },
     });
   }
+
+  async getReceivers(userId: string): Promise<User[]> {
+    return await this.prisma.user.findMany({
+      where: {
+        id: {
+          not: userId,
+        },
+      },
+    });
+  }
 }
