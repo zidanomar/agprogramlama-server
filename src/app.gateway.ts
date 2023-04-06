@@ -1,11 +1,8 @@
 import { IncomingMessage } from 'http';
-import * as os from 'os';
 import { UseGuards } from '@nestjs/common/decorators';
 import {
   ConnectedSocket,
-  SubscribeMessage,
   WebSocketGateway,
-  MessageBody,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -47,7 +44,7 @@ export class AppGateway {
       client.request.user = decodedUser;
 
       this.userService.updateUserSocketId(decodedUser.id, socketId);
-      console.log(`User ${decodedUser.id} connected`);
+      console.log(`Client ${decodedUser.id} connected`);
     } catch (error) {
       console.log(`Error verifying token: ${error.message}`);
       client.disconnect();
@@ -56,25 +53,5 @@ export class AppGateway {
 
   handleDisconnect(client: Socket) {
     console.log(`Client ${client.id} disconnected`);
-  }
-
-  @SubscribeMessage('events')
-  handleEvent(): void {
-    console.log('Hello world!');
-    this.server.emit('events', 'Hello world!');
-  }
-
-  @SubscribeMessage('message')
-  handleMessage(client: any, message: string): void {
-    this.server.emit('message', message);
-  }
-
-  @SubscribeMessage('peformance')
-  peformance() {
-    console.log('first');
-    setInterval(() => {
-      const cpuUsage = ((os.totalmem() - os.freemem()) / os.totalmem()) * 100;
-      this.server.emit('peformance', cpuUsage);
-    }, 100);
   }
 }

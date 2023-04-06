@@ -1,30 +1,45 @@
 import { Injectable } from '@nestjs/common';
+import { Conversation } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
 
 @Injectable()
 export class ConversationService {
-  sendMessage() {
-    return 'This action sends a message';
-  }
+  constructor(private prisma: PrismaService) {}
 
-  create(createConversationDto: CreateConversationDto) {
-    return 'This action adds a new conversation';
-  }
+  async createConversation(
+    createConversationDto: CreateConversationDto,
+  ): Promise<Conversation[]> {
+    const { receiverIds, senderId, type, name } = createConversationDto;
 
-  findAll() {
-    return `This action returns all conversation`;
-  }
+    const conversations: Conversation[] = await Promise.all(
+      receiverIds.map(async (receiverId) => {
+        const existingConversation = await this.prisma.conversation.findFirst({
+          where: {
+            AND: [
+              { users: { some: { id: { equals: senderId } } } },
+              { users: { some: { id: { equals: receiverId } } } },
+            ],
+          },
+        });
 
-  findOne(id: number) {
-    return `This action returns a #${id} conversation`;
-  }
+        if (existingConversation) {
+          return existingConversation;
+        } else {
+          const newConversation = await this.prisma.conversation.create({
+            data: {
+              name,
+              type,
+              users: {
+                connect: [{ id: senderId }, { id: receiverId }],
+              },
+            },
+          });
+          return newConversation;
+        }
+      }),
+    );
 
-  update(id: number, updateConversationDto: UpdateConversationDto) {
-    return `This action updates a #${id} conversation`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} conversation`;
+    return conversations;
   }
 }

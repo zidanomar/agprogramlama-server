@@ -2,40 +2,24 @@ import {
   WebSocketGateway,
   SubscribeMessage,
   MessageBody,
+  WebSocketServer,
 } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
 
 @WebSocketGateway()
 export class ConversationGateway {
+  @WebSocketServer() server: Server;
+
   constructor(private readonly conversationService: ConversationService) {}
 
-  @SubscribeMessage('createConversation')
-  create(@MessageBody() createConversationDto: CreateConversationDto) {
-    return this.conversationService.create(createConversationDto);
-  }
+  @SubscribeMessage('message:sendBroadcast')
+  async sendBroadcast(@MessageBody() data: CreateConversationDto) {
+    console.log('sendBroadcast', data);
 
-  @SubscribeMessage('findAllConversation')
-  findAll() {
-    return this.conversationService.findAll();
-  }
-
-  @SubscribeMessage('findOneConversation')
-  findOne(@MessageBody() id: number) {
-    return this.conversationService.findOne(id);
-  }
-
-  @SubscribeMessage('updateConversation')
-  update(@MessageBody() updateConversationDto: UpdateConversationDto) {
-    return this.conversationService.update(
-      updateConversationDto.id,
-      updateConversationDto,
-    );
-  }
-
-  @SubscribeMessage('removeConversation')
-  remove(@MessageBody() id: number) {
-    return this.conversationService.remove(id);
+    await this.conversationService.createConversation(data);
+    // this.server.emit('message:receive', data);
+    return data;
   }
 }

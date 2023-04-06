@@ -31,21 +31,27 @@ model UserCredential {
 }
 
 model Conversation {
-  id        String    @id @default(uuid())
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  users     User[]    @relation("ConversationUser")
-  messages  Message[] @relation("ConversationMessage")
+  id        String           @id @default(uuid())
+  name      String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  type      ConversationType
+  users     User[]           @relation("ConversationUser")
+  messages  Message[]        @relation("conversationMessage")
+}
+
+enum ConversationType {
+  PERSONAL
+  GROUP
 }
 
 model Message {
-  id             Int          @id @default(autoincrement())
-  text           String
+  id             String       @id @default(uuid())
+  content        String
   sentAt         DateTime     @default(now())
   seen           Boolean      @default(false)
   sender         User         @relation(fields: [senderId], references: [id])
   senderId       String
-  Conversation   Conversation @relation("ConversationMessage", fields: [ConversationId], references: [id])
-  ConversationId String
+  conversation   Conversation @relation("conversationMessage", fields: [conversationId], references: [id])
+  conversationId String
 }

@@ -1,30 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { Message } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { ConversationService } from '../conversation/conversation.service';
+import { CreateConversationDto } from '../conversation/dto/create-conversation.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Injectable()
 export class MessageService {
-  sendMessage() {
-    return 'This action sends a message';
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly conversationService: ConversationService,
+  ) {}
 
-  create(createMessageDto: CreateMessageDto) {
-    return 'This action adds a new message';
-  }
+  async sendMessage(data: SendMessageDto): Promise<Message[]> {
+    const conversationDto: CreateConversationDto = {
+      receiverIds: data.receivers.map((x) => x.id),
+      senderId: data.sender.id,
+      type: 'PRIVATE',
+    };
 
-  findAll() {
-    return `This action returns all message`;
-  }
+    const conversations = await this.conversationService.createConversation(
+      conversationDto,
+    );
 
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
-  }
+    return await Promise.all(
+      conversations.map(async (conversation) => {
+        const message = await this.prisma.message.create({
+          data: {
+            content: data.content,
+            sender: {
+              connect: { id: data.sender.id },
+            },
+            conversation: {
+              connect: { id: conversation.id },
+            },
+          },
+          include: {
+            conversation: true,
+          },
+        });
 
-  update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} message`;
+        return message;
+      }),
+    );
   }
 }

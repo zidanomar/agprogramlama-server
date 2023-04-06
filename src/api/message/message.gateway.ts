@@ -3,41 +3,23 @@ import {
   SubscribeMessage,
   MessageBody,
 } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 import { MessageService } from './message.service';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { SendMessageDto } from './dto/send-message.dto';
+import { WebSocketServer } from '@nestjs/websockets/decorators';
 
 @WebSocketGateway()
 export class MessageGateway {
+  @WebSocketServer() server: Server;
+
   constructor(private readonly messageService: MessageService) {}
 
   @SubscribeMessage('message:send')
-  sendMessage() {
-    return this.messageService.sendMessage();
-  }
-
-  @SubscribeMessage('createMessage')
-  create(@MessageBody() createMessageDto: CreateMessageDto) {
-    return this.messageService.create(createMessageDto);
-  }
-
-  @SubscribeMessage('findAllMessage')
-  findAll() {
-    return this.messageService.findAll();
-  }
-
-  @SubscribeMessage('findOneMessage')
-  findOne(@MessageBody() id: number) {
-    return this.messageService.findOne(id);
-  }
-
-  @SubscribeMessage('updateMessage')
-  update(@MessageBody() updateMessageDto: UpdateMessageDto) {
-    return this.messageService.update(updateMessageDto.id, updateMessageDto);
-  }
-
-  @SubscribeMessage('removeMessage')
-  remove(@MessageBody() id: number) {
-    return this.messageService.remove(id);
+  async sendMessage(@MessageBody() data: SendMessageDto) {
+    const messages = await this.messageService.sendMessage(data);
+    // messages.forEach((message) => {
+    //   message.ConversationId
+    // });
+    console.log(messages);
   }
 }
