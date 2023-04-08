@@ -1,3 +1,3 @@
-export const CONVERSATION = {
-  'send-message': 'consversation:send-message',
+export const MESSAGE = {
+  'send-message': 'message:send-message',
 };
