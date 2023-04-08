@@ -1,8 +1,8 @@
-import { ConversationType } from '@prisma/client';
+import { ConversationType, User } from '@prisma/client';
 
 export class CreateConversationDto {
-  senderId: string;
-  receiverIds: string[];
+  sender: User;
+  receivers: User[];
   name?: string;
   type: ConversationType;
 }

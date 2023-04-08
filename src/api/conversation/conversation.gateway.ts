@@ -5,6 +5,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { CONVERSATION } from 'src/constant/socket.constant';
+import { MessageService } from '../message/message.service';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 
@@ -12,14 +14,19 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 export class ConversationGateway {
   @WebSocketServer() server: Server;
 
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly messageService: MessageService,
+  ) {}
 
-  @SubscribeMessage('message:sendBroadcast')
+  @SubscribeMessage(CONVERSATION['send-message'])
   async sendBroadcast(@MessageBody() data: CreateConversationDto) {
-    console.log('sendBroadcast', data);
+    const messages = await this.conversationService.createConversation(data);
 
-    await this.conversationService.createConversation(data);
-    // this.server.emit('message:receive', data);
+    for (const { users } of messages) {
+      // create message
+    }
+
     return data;
   }
 }

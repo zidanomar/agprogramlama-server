@@ -11,15 +11,4 @@ import { WebSocketServer } from '@nestjs/websockets/decorators';
 @WebSocketGateway()
 export class MessageGateway {
   @WebSocketServer() server: Server;
-
-  constructor(private readonly messageService: MessageService) {}
-
-  @SubscribeMessage('message:send')
-  async sendMessage(@MessageBody() data: SendMessageDto) {
-    const messages = await this.messageService.sendMessage(data);
-    // messages.forEach((message) => {
-    //   message.ConversationId
-    // });
-    console.log(messages);
-  }
 }
