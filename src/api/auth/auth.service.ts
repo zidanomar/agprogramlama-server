@@ -20,13 +20,8 @@ export class AuthService {
   }
 
   async verifyToken(token: string): Promise<User> {
-    try {
-      const decoded = this.jwtService.verify(token);
-      const user = await this.validateUser(decoded.id);
-      return user;
-    } catch (err) {
-      throw new Error('Invalid token');
-    }
+    const decoded = await this.jwtService.verify(token);
+    return await this.validateUser(decoded.id);
   }
 
   async login(loginDto: LoginDto) {
