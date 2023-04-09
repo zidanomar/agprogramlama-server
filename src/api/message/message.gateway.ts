@@ -31,8 +31,6 @@ export class MessageGateway {
           type: 'PERSONAL',
         });
 
-      console.log(conversation);
-
       const message = await this.messageService.sendMessage({
         content: data.content,
         sender,
@@ -40,9 +38,9 @@ export class MessageGateway {
         conversation,
       });
 
-      console.log(message);
-
-      this.server.emit(MESSAGE['send-message'], message);
+      this.server
+        .to(receiver.socketId)
+        .emit(MESSAGE['message-sended'], message);
     }
 
     return data;
