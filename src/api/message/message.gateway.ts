@@ -40,7 +40,8 @@ export class MessageGateway {
 
       this.server
         .to(receiver.socketId)
-        .emit(MESSAGE['message-sended'], message);
+        .emit(MESSAGE['receive-message'], message);
+      this.server.to(sender.socketId).emit(MESSAGE['message-sended'], message);
     }
 
     return data;
