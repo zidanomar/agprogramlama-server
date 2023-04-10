@@ -42,4 +42,25 @@ export class UserService {
       },
     });
   }
+
+  async userDisconnect(socketId: string): Promise<User | null> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        socketId,
+      },
+    });
+
+    if (!existingUser) {
+      return null;
+    }
+
+    return await this.prisma.user.update({
+      where: {
+        socketId,
+      },
+      data: {
+        socketId: null,
+      },
+    });
+  }
 }

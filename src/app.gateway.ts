@@ -10,6 +10,7 @@ import { User } from '@prisma/client';
 import { WsAuthGuard } from './api/auth/guards/ws.guard';
 import { AuthService } from './api/auth/auth.service';
 import { UserService } from './api/user/user.service';
+import { USER } from './constant/socket.constant';
 
 interface RequestWithUser extends IncomingMessage {
   user: User;
@@ -43,15 +44,25 @@ export class AppGateway {
 
       client.request.user = decodedUser;
 
-      this.userService.updateUserSocketId(decodedUser.id, socketId);
-      console.log(`Client ${decodedUser.id} connected`);
+      const updatedUser = await this.userService.updateUserSocketId(
+        decodedUser.id,
+        socketId,
+      );
+
+      console.log(`Client ${socketId} connected`);
+      this.server.emit(USER['user-connected'], updatedUser);
     } catch (error) {
       console.log(`Error verifying token: ${error.message}`);
       client.disconnect();
     }
   }
 
-  handleDisconnect(client: Socket) {
+  @UseGuards(WsAuthGuard)
+  async handleDisconnect(client: Socket) {
+    const user = await this.userService.userDisconnect(client.id);
+    if (user) {
+      this.server.emit(USER['user-disconnected'], user);
+    }
     console.log(`Client ${client.id} disconnected`);
   }
 }
