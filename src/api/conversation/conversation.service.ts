@@ -70,6 +70,7 @@ export class ConversationService {
         users: {
           connect: [{ id: sender.id }, ...receivers.map((r) => ({ id: r.id }))],
         },
+        name: createConversationDto.name,
       },
       include: {
         users: true,
@@ -92,6 +93,9 @@ export class ConversationService {
             },
           },
         },
+      },
+      orderBy: {
+        updatedAt: 'desc', // Order by updatedAt field in descending order
       },
       include: {
         users: true,
