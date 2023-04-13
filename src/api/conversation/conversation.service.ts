@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Conversation, Message, Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateConversationDto } from './dto/create-conversation.dto';
-
-type ConversationDetail = Conversation & {
-  users: User[];
-  messages: Message[];
-};
+import {
+  CreateConversationDto,
+  CreateGroupConversationDto,
+} from './dto/create-conversation.dto';
+import {
+  ConversationDetail,
+  ConversationWithUsers,
+} from './entities/conversation.entity';
 
 @Injectable()
 export class ConversationService {
   constructor(private prisma: PrismaService) {}
 
+  // ===================== CREATE =====================
   async findOrCreateConversation(
     createConversationDto: CreateConversationDto,
   ): Promise<ConversationDetail> {
@@ -56,6 +58,27 @@ export class ConversationService {
       return newConversation;
     }
   }
+
+  async createGroupConversation(
+    createConversationDto: CreateGroupConversationDto,
+  ): Promise<ConversationWithUsers> {
+    const { receivers, sender } = createConversationDto;
+
+    const newConversation = await this.prisma.conversation.create({
+      data: {
+        type: 'GROUP',
+        users: {
+          connect: [{ id: sender.id }, ...receivers.map((r) => ({ id: r.id }))],
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    return newConversation;
+  }
+  // ===================== READ =====================
 
   async getConversationsByUserId(
     userId: string,
