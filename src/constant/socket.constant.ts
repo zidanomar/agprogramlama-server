@@ -3,3 +3,8 @@ export const MESSAGE = {
   'receive-message': 'message:receive-message',
   'message-sended': 'message:message-sended',
 };
+
+export const USER = {
+  'user-connected': 'user:user-connected',
+  'user-disconnected': 'user:user-disconnected',
+};
