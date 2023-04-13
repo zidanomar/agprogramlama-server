@@ -7,7 +7,9 @@ import {
   UseGuards,
   Param,
 } from '@nestjs/common';
+import { CONVERSATION } from 'src/constant/socket.constant';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { ConversationGateway } from './conversation.gateway';
 import { ConversationService } from './conversation.service';
 import {
   ConversationDetail,
@@ -16,7 +18,10 @@ import {
 
 @Controller('conversation')
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly conversationGateway: ConversationGateway,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -30,10 +35,21 @@ export class ConversationController {
   @Post('new-group')
   async createGroupConversation(
     @Body() createGroupDto,
+    @Req() req,
   ): Promise<ConversationWithUsers> {
     const conversation = await this.conversationService.createGroupConversation(
       createGroupDto,
     );
+
+    conversation.users
+      .filter((u) => u.id !== req.user.id)
+      .forEach((u) => {
+        console.log(u.socketId);
+        this.conversationGateway.server
+          .to(u.socketId)
+          .emit(CONVERSATION['conversation-created'], conversation);
+      });
+
     return conversation;
   }
 

@@ -8,3 +8,7 @@ export const USER = {
   'user-connected': 'user:user-connected',
   'user-disconnected': 'user:user-disconnected',
 };
+
+export const CONVERSATION = {
+  'conversation-created': 'conversation:conversation-created',
+};

@@ -3,5 +3,6 @@ import { Server } from 'socket.io';
 
 @WebSocketGateway()
 export class ConversationGateway {
-  @WebSocketServer() server: Server;
+  @WebSocketServer()
+  server: Server;
 }
