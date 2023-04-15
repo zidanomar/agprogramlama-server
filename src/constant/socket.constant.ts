@@ -11,4 +11,5 @@ export const USER = {
 
 export const CONVERSATION = {
   'conversation-created': 'conversation:conversation-created',
+  'broadcast-sent': 'conversation:broadcast-sent',
 };

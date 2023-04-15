@@ -1,7 +1,5 @@
 import { ConversationType, User } from '@prisma/client';
-import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, ValidateNested } from 'class-validator';
-
 export class CreateConversationDto {
   sender: User;
   receiver: User;
@@ -21,4 +19,17 @@ export class CreateGroupConversationDto {
   name: string;
 
   type: ConversationType = 'GROUP';
+}
+
+export class SendBroadcastMessageDto {
+  @IsNotEmpty()
+  sender: User;
+
+  @IsNotEmpty()
+  @IsArray()
+  @ValidateNested({ each: true })
+  receivers: User[];
+
+  @IsNotEmpty()
+  content: string;
 }

@@ -11,6 +11,7 @@ import { CONVERSATION } from 'src/constant/socket.constant';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ConversationGateway } from './conversation.gateway';
 import { ConversationService } from './conversation.service';
+import { SendBroadcastMessageDto } from './dto/create-conversation.dto';
 import {
   ConversationDetail,
   ConversationWithUsers,
@@ -54,8 +55,31 @@ export class ConversationController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('broadcast')
+  async broadcastMessage(
+    @Body() broadcastMessageDto: SendBroadcastMessageDto,
+    @Req() req,
+  ): Promise<ConversationWithUsers[]> {
+    const conversations = await this.conversationService.sendBroadcastMessage(
+      broadcastMessageDto,
+    );
+
+    conversations.forEach((c) => {
+      c.users
+        .filter((u) => u.id !== req.user.id)
+        .forEach((u) => {
+          this.conversationGateway.server
+            .to(u.socketId)
+            .emit(CONVERSATION['broadcast-sent'], c);
+        });
+    });
+
+    return conversations;
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':conversationId')
-  async getConversationById(@Param() params): Promise<ConversationDetail> {
+  async getConversationById(@Param() params): Promise<ConversationWithUsers> {
     const conversation = await this.conversationService.getConversationById(
       params.conversationId,
     );
