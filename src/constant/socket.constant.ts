@@ -1,6 +1,6 @@
 export const MESSAGE = {
   'send-message': 'message:send-message',
-  'receive-message': 'message:receive-message',
+  'new-message': 'message:new-message',
   'message-sended': 'message:message-sended',
 };
 

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Conversation } from '@prisma/client';
+import { Conversation, Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CreateConversationDto,
@@ -31,11 +31,6 @@ export class ConversationService {
       },
       include: {
         users: true,
-        messages: {
-          orderBy: {
-            sentAt: 'asc',
-          },
-        },
       },
     });
 
@@ -80,8 +75,8 @@ export class ConversationService {
 
   async sendBroadcastMessage(
     sendBroadcastMessageDto: SendBroadcastMessageDto,
-  ): Promise<ConversationWithUsers[]> {
-    const { receivers, sender } = sendBroadcastMessageDto;
+  ): Promise<{ conversation: ConversationWithUsers; message: Message }[]> {
+    const { receivers, sender, content } = sendBroadcastMessageDto;
 
     const conversations = await Promise.all(
       receivers.map(async (receiver) => {
@@ -91,9 +86,9 @@ export class ConversationService {
           type: 'PERSONAL',
         });
 
-        await this.prisma.message.create({
+        const message = await this.prisma.message.create({
           data: {
-            content: sendBroadcastMessageDto.content,
+            content,
             sender: {
               connect: {
                 id: sender.id,
@@ -108,7 +103,7 @@ export class ConversationService {
         });
 
         await this.updateConvLastMsgAt(conversation.id);
-        return conversation;
+        return { conversation, message };
       }),
     );
 
@@ -155,7 +150,7 @@ export class ConversationService {
   async getConversationById(
     conversationId: string,
   ): Promise<ConversationDetail> {
-    return await this.prisma.conversation.findUnique({
+    const conversation = await this.prisma.conversation.findUnique({
       where: {
         id: conversationId,
       },
@@ -168,6 +163,12 @@ export class ConversationService {
         },
       },
     });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    return conversation;
   }
 
   // ===================== UPDATE =====================

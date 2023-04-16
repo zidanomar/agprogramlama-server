@@ -7,9 +7,10 @@ import {
   UseGuards,
   Param,
 } from '@nestjs/common';
-import { CONVERSATION } from 'src/constant/socket.constant';
+import { Message } from '@prisma/client';
+import { AppGateway } from 'src/app.gateway';
+import { CONVERSATION, MESSAGE } from 'src/constant/socket.constant';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { ConversationGateway } from './conversation.gateway';
 import { ConversationService } from './conversation.service';
 import { SendBroadcastMessageDto } from './dto/create-conversation.dto';
 import {
@@ -21,7 +22,7 @@ import {
 export class ConversationController {
   constructor(
     private readonly conversationService: ConversationService,
-    private readonly conversationGateway: ConversationGateway,
+    private readonly appGateway: AppGateway,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -45,8 +46,7 @@ export class ConversationController {
     conversation.users
       .filter((u) => u.id !== req.user.id)
       .forEach((u) => {
-        console.log(u.socketId);
-        this.conversationGateway.server
+        this.appGateway.server
           .to(u.socketId)
           .emit(CONVERSATION['conversation-created'], conversation);
       });
@@ -57,24 +57,28 @@ export class ConversationController {
   @UseGuards(JwtAuthGuard)
   @Post('broadcast')
   async broadcastMessage(
-    @Body() broadcastMessageDto: SendBroadcastMessageDto,
+    @Body() broadcastMessageDto,
     @Req() req,
-  ): Promise<ConversationWithUsers[]> {
-    const conversations = await this.conversationService.sendBroadcastMessage(
+  ): Promise<{ conversation: ConversationWithUsers; message: Message }[]> {
+    const res = await this.conversationService.sendBroadcastMessage(
       broadcastMessageDto,
     );
 
-    conversations.forEach((c) => {
-      c.users
+    res.forEach(({ conversation, message }) => {
+      conversation.users
         .filter((u) => u.id !== req.user.id)
         .forEach((u) => {
-          this.conversationGateway.server
+          this.appGateway.server
             .to(u.socketId)
-            .emit(CONVERSATION['broadcast-sent'], c);
+            .emit(CONVERSATION['broadcast-sent'], conversation);
+          console.log(u.socketId);
+          this.appGateway.server
+            .to(u.socketId)
+            .emit(MESSAGE['new-message'], message);
         });
     });
 
-    return conversations;
+    return res;
   }
 
   @UseGuards(JwtAuthGuard)
