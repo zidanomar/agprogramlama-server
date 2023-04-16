@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Conversation, Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { SendMessageDto } from '../message/dto/send-message.dto';
 import {
   CreateConversationDto,
   CreateGroupConversationDto,
@@ -10,6 +11,7 @@ import {
   ConversationDetail,
   ConversationWithUsers,
 } from './entities/conversation.entity';
+import { MessageDetail } from './entities/message.entity';
 
 @Injectable()
 export class ConversationService {
@@ -71,6 +73,33 @@ export class ConversationService {
     });
 
     return newConversation;
+  }
+
+  async sendMessage(sendMessageDto: SendMessageDto): Promise<MessageDetail> {
+    const { sender, content, conversation } = sendMessageDto;
+    console.log(conversation.id);
+    return await this.prisma.message.create({
+      data: {
+        content,
+        sender: {
+          connect: {
+            id: sender.id,
+          },
+        },
+        conversation: {
+          connect: {
+            id: conversation.id,
+          },
+        },
+      },
+      include: {
+        conversation: {
+          include: {
+            users: true,
+          },
+        },
+      },
+    });
   }
 
   async sendBroadcastMessage(

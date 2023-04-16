@@ -17,6 +17,7 @@ import {
   ConversationDetail,
   ConversationWithUsers,
 } from './entities/conversation.entity';
+import { MessageDetail } from './entities/message.entity';
 
 @Controller('conversation')
 export class ConversationController {
@@ -31,6 +32,25 @@ export class ConversationController {
     const conversations =
       await this.conversationService.getConversationsByUserId(req.user.id);
     return conversations;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('personal-message')
+  async sendMessage(@Body() sendMessageDto): Promise<MessageDetail> {
+    const message = await this.conversationService.sendMessage(sendMessageDto);
+
+    message.conversation.users
+      .filter((u) => u.id !== message.senderId)
+      .forEach((u) => {
+        this.appGateway.server
+          .to(u.socketId)
+          .emit(MESSAGE['new-message'], message);
+        this.appGateway.server
+          .to(u.socketId)
+          .emit(CONVERSATION['conversation-created'], message.conversation);
+      });
+
+    return message;
   }
 
   @UseGuards(JwtAuthGuard)
