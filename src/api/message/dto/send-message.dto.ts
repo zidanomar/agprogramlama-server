@@ -17,20 +17,3 @@ export class SendMessageDto {
   @IsString()
   conversation: Conversation;
 }
-
-export class SendMessageBodyDto {
-  @IsNotEmpty()
-  @IsString()
-  content: string;
-
-  @IsNotEmpty()
-  @IsString()
-  sender: User;
-
-  @IsNotEmpty()
-  @IsString()
-  receivers: User[];
-
-  @IsString()
-  conversation: Conversation;
-}
