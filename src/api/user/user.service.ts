@@ -54,6 +54,8 @@ export class UserService {
       return null;
     }
 
+    if (!socketId) return;
+
     return await this.prisma.user.update({
       where: {
         socketId,

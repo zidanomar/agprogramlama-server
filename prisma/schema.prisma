@@ -31,13 +31,14 @@ model UserCredential {
 }
 
 model Conversation {
-  id        String           @id @default(uuid())
-  name      String?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  type      ConversationType
-  users     User[]           @relation("ConversationUser")
-  messages  Message[]        @relation("conversationMessage")
+  id            String           @id @default(uuid())
+  name          String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  lastMessageAt DateTime         @default(now())
+  type          ConversationType
+  users         User[]           @relation("ConversationUser")
+  messages      Message[]        @relation("conversationMessage")
 }
 
 enum ConversationType {
