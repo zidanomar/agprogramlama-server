@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Conversation, Message } from '@prisma/client';
+import { Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SendMessageDto } from '../message/dto/send-message.dto';
 import {
@@ -12,6 +12,7 @@ import {
   ConversationWithUsers,
 } from './entities/conversation.entity';
 import { MessageDetail } from './entities/message.entity';
+import messageDecoder from 'src/utils/message-decoder';
 
 @Injectable()
 export class ConversationService {
@@ -77,10 +78,11 @@ export class ConversationService {
 
   async sendMessage(sendMessageDto: SendMessageDto): Promise<MessageDetail> {
     const { sender, content, conversation } = sendMessageDto;
-    console.log(conversation.id);
+
     return await this.prisma.message.create({
       data: {
         content,
+        iv: '',
         sender: {
           connect: {
             id: sender.id,
@@ -104,7 +106,9 @@ export class ConversationService {
 
   async sendBroadcastMessage(
     sendBroadcastMessageDto: SendBroadcastMessageDto,
-  ): Promise<{ conversation: ConversationWithUsers; message: Message }[]> {
+  ): Promise<
+    { conversation: ConversationWithUsers; message: MessageDetail }[]
+  > {
     const { receivers, sender, content } = sendBroadcastMessageDto;
 
     const conversations = await Promise.all(
@@ -115,9 +119,10 @@ export class ConversationService {
           type: 'PERSONAL',
         });
 
-        const message = await this.prisma.message.create({
+        const message = (await this.prisma.message.create({
           data: {
             content,
+            iv: '',
             sender: {
               connect: {
                 id: sender.id,
@@ -129,7 +134,7 @@ export class ConversationService {
               },
             },
           },
-        });
+        })) as MessageDetail;
 
         await this.updateConvLastMsgAt(conversation.id);
         return { conversation, message };
@@ -189,12 +194,20 @@ export class ConversationService {
           orderBy: {
             sentAt: 'asc',
           },
+          include: {
+            conversation: true,
+          },
         },
       },
     });
 
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
+    }
+
+    for (const message of conversation.messages) {
+      const decodedMessage = messageDecoder(message as MessageDetail);
+      message.content = decodedMessage.content;
     }
 
     return conversation;

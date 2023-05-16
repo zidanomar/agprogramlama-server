@@ -12,6 +12,7 @@ export class MessageService {
     return await this.prisma.message.create({
       data: {
         content,
+        iv: '',
         sender: {
           connect: {
             id: sender.id,
