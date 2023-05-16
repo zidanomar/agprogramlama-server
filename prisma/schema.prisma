@@ -55,4 +55,5 @@ model Message {
   senderId       String
   conversation   Conversation @relation("conversationMessage", fields: [conversationId], references: [id])
   conversationId String
+  iv             String
 }

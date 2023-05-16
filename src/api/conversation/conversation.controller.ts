@@ -12,12 +12,12 @@ import { AppGateway } from 'src/app.gateway';
 import { CONVERSATION, MESSAGE } from 'src/constant/socket.constant';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ConversationService } from './conversation.service';
-import { SendBroadcastMessageDto } from './dto/create-conversation.dto';
 import {
   ConversationDetail,
   ConversationWithUsers,
 } from './entities/conversation.entity';
 import { MessageDetail } from './entities/message.entity';
+import messageDecoder from 'src/utils/message-decoder';
 
 @Controller('conversation')
 export class ConversationController {
@@ -37,7 +37,11 @@ export class ConversationController {
   @UseGuards(JwtAuthGuard)
   @Post('personal-message')
   async sendMessage(@Body() sendMessageDto): Promise<MessageDetail> {
-    const message = await this.conversationService.sendMessage(sendMessageDto);
+    const rawMessage = await this.conversationService.sendMessage(
+      sendMessageDto,
+    );
+
+    const message = messageDecoder(rawMessage);
 
     message.conversation.users
       .filter((u) => u.id !== message.senderId)
@@ -84,7 +88,9 @@ export class ConversationController {
       broadcastMessageDto,
     );
 
-    res.forEach(({ conversation, message }) => {
+    res.forEach(({ conversation, message: rawMessage }) => {
+      const message = messageDecoder(rawMessage);
+
       conversation.users
         .filter((u) => u.id !== req.user.id)
         .forEach((u) => {
