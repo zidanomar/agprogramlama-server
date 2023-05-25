@@ -108,6 +108,15 @@ export class ConversationController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('unseen-messages')
+  async getUnseenMessage(@Req() req): Promise<number> {
+    const conversation = await this.conversationService.getUnseenMessages(
+      req.user.id,
+    );
+    return conversation;
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':conversationId')
   async getConversationById(@Param() params): Promise<ConversationWithUsers> {
     const conversation = await this.conversationService.getConversationById(

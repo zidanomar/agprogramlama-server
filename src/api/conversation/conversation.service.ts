@@ -169,6 +169,12 @@ export class ConversationService {
       },
     });
 
+    const unseenMessagesCount = conversations.reduce((count, conversation) => {
+      const messages = conversation.messages;
+      const unseenMessages = messages.filter((message) => !message.seen);
+      return count + unseenMessages.length;
+    }, 0);
+
     return conversations.map((c) => {
       const convName =
         c.type === 'PERSONAL'
@@ -177,6 +183,7 @@ export class ConversationService {
       return {
         ...c,
         name: convName,
+        unseenMessages: unseenMessagesCount,
       };
     });
   }
@@ -201,6 +208,16 @@ export class ConversationService {
       },
     });
 
+    await this.prisma.message.updateMany({
+      where: {
+        conversationId,
+        seen: false,
+      },
+      data: {
+        seen: true,
+      },
+    });
+
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
     }
@@ -210,8 +227,34 @@ export class ConversationService {
       message.content = decodedMessage.content;
     }
 
-    return conversation;
+    return {
+      ...conversation,
+      unseenMessages: conversation.messages.filter((m) => !m.seen).length,
+    };
   }
+
+  getUnseenMessages = async (userId: string): Promise<number> => {
+    return await this.prisma.message.count({
+      where: {
+        AND: [
+          {
+            conversation: {
+              users: {
+                some: {
+                  id: {
+                    equals: userId,
+                  },
+                },
+              },
+            },
+          },
+          {
+            seen: false,
+          },
+        ],
+      },
+    });
+  };
 
   // ===================== UPDATE =====================
   async updateConvLastMsgAt(
