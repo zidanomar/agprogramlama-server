@@ -42,6 +42,10 @@ export class AppGateway {
       const token = client.handshake.headers.authorization.split(' ')[1];
       const decodedUser = await this.authService.verifyToken(token);
 
+      if (!decodedUser) {
+        throw new Error('Invalid authentication token');
+      }
+
       client.request.user = decodedUser;
 
       const updatedUser = await this.userService.updateUserSocketId(
@@ -59,10 +63,15 @@ export class AppGateway {
 
   @UseGuards(WsAuthGuard)
   async handleDisconnect(client: Socket) {
-    const user = await this.userService.userDisconnect(client.id);
-    if (user) {
-      this.server.emit(USER['user-disconnected'], user);
+    try {
+      const user = await this.userService.userDisconnect(client.id);
+      if (user) {
+        this.server.emit(USER['user-disconnected'], user);
+      }
+    } catch (error) {
+      console.log(`Error verifying token: ${error.message}`);
+    } finally {
+      console.log(`Client ${client.id} disconnected`);
     }
-    console.log(`Client ${client.id} disconnected`);
   }
 }
