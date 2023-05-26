@@ -17,3 +17,5 @@
  `npx prisma migrate dev`
 7. ```npm start``` ile programın backendini başlatın
 - <img src="https://github.com/zidanomar/agprogramlama-server/assets/96066271/bdc99976-377c-4130-be71-b796b8d5d0d8" width="500" alt="image">
+### Veri Tabanı Dizaynı
+- <img src="https://github.com/kaygisizkamil/readme/assets/96066271/a9c98baf-ca55-482f-98ab-5516d98b921b" width="500" alt="image">
