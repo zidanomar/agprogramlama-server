@@ -1,23 +1,19 @@
 <h1  align="center">Ağ Programlama Server</h1>
 
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Repo İçeriği
+- Socket programlama ile mesajlaşma uygulamasının backend işlemlerini içeren kodlar buradadır
+- Sunulan özellikler:Jwt authentication-veri tabanı bağlantısı ,gerçek zamanlı ve uçtan-uca şifreli mesajlaşma,kullanıcı işlemleri ,login-signup...
+## Projeyi Çalıştırmak İçin
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+1. Git repository'sini klonlayın: `git clone https://github.com/zidanomar/agprogramlama-server.git`
+2. Gerekli bağımlılıkları yükleyin:  `npm install`
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
+3. Proje ana dizininde `.env` dosyasını oluşturun. 
+
+4. `.env.example` dosyasındaki ayarları `.env` dosyasına kopyalayın.
+(``` Not: .env dosyasını sonradan oluşturma sebebimiz, yazılım standart prosedürlerini takip ettiğimi için, gizli kurulum dosyalarının Git üzerinde paylaşılmaması gerekliliği nedeniyle yapılmaktadır. ```)
+5. Postgre bağlantınızı ayarlayın.(```Şifreniz .env den farklı ise .env dosyasını kendi ayarlarınızı güncelleyin```)
+6. Veritabanı migration'larını ayarlamak için aşağıdaki komutu kullanın:
+ `npx prisma migrate dev`
+7. ```npm start``` ile programın backendini başlatın
+- <img src="https://github.com/zidanomar/agprogramlama-server/assets/96066271/bdc99976-377c-4130-be71-b796b8d5d0d8" width="500" alt="image">
